@@ -1,1 +1,1 @@
-mod hello_world;
+mod binary_merkle_root;
