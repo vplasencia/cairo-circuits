@@ -2,5 +2,13 @@
 version = 1
 
 [[package]]
+name = "cairo_binary_merkle_root"
+version = "0.1.0"
+source = "git+https://github.com/vplasencia/cairo-binary-merkle-root?branch=main#e1e06b92130de35124982b3d772dece138960439"
+
+[[package]]
 name = "cairo_circuits"
 version = "0.1.0"
+dependencies = [
+ "cairo_binary_merkle_root",
+]

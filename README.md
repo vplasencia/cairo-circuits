@@ -1,13 +1,13 @@
 # Cairo Circuits
 
-This project contains some Cairo circuits, which can be found in the `src` folder.
+This project contains some Cairo circuits.
 
 ## Currently Implemented Circuits
 
-- **Binary Merkle Root**
+- [**Binary Merkle Root**](https://github.com/vplasencia/cairo-binary-merkle-root)
 Computes binary Merkle tree root. Compatible with any binary Merkle tree construction including LeanIMT.
 
-- **RLN protocol**
+- [**RLN protocol**](./src/lib.cairo)
 Rate Limiting Nullifier protocol. A zero-knowledge protocol designed for spam prevention in anonymous environments.
 
 ## Build

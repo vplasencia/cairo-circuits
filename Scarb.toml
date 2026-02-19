@@ -12,6 +12,7 @@ enable-gas = false
 
 [dependencies]
 cairo_execute = "2.15.0"
+cairo_binary_merkle_root = { git = "https://github.com/vplasencia/cairo-binary-merkle-root", branch = "main" }
 
 [dev-dependencies]
 cairo_test = "2.14.0"
