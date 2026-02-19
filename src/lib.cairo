@@ -1,4 +1,4 @@
-mod binary_merkle_root;
+use binary_merkle_root::binary_merkle_root;
 use core::integer::{u32, u8};
 use core::poseidon::poseidon_hash_span;
 
@@ -32,9 +32,7 @@ fn main(
     let rate_commitment = poseidon2(identity_commitment, user_message_limit);
 
     // Calculate Merkle root.
-    let merkle_root = binary_merkle_root::binary_merkle_root::<
-        MAX_DEPTH,
-    >(rate_commitment, merkle_proof_length, merkle_proof_indices, merkle_proof_siblings);
+    let merkle_root = binary_merkle_root::binary_merkle_root(rate_commitment, merkle_proof_length, merkle_proof_indices, merkle_proof_siblings);
 
     // message_id range check
     // Check 0 <= message_id < user_message_limit

@@ -1,18 +1,12 @@
 [package]
-name = "cairo_circuits"
-version = "0.1.0"
+name = "binary_merkle_root"
+version = "0.0.1"
 edition = "2025_12"
 
 # See more keys and their definitions at https://docs.swmansion.com/scarb/docs/reference/manifest.html
 
-[executable]
-
 [cairo]
 enable-gas = false
-
-[dependencies]
-cairo_execute = "2.15.0"
-binary_merkle_root = { path = "packages/binary_merkle_root" }
 
 [dev-dependencies]
 cairo_test = "2.14.0"
