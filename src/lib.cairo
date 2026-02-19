@@ -47,7 +47,7 @@ fn main(
     // Nullifier generation.
     let nullifier = poseidon1(a1);
 
-    // Output the share, the root and nullifier.
+    // Output x, the scope, the share, the root and nullifier.
     (x, scope, y, merkle_root, nullifier)
 }
 
