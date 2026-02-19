@@ -12,7 +12,6 @@ enable-gas = false
 
 [dependencies]
 cairo_execute = "2.15.0"
-binary_merkle_root = { path = "packages/binary_merkle_root" }
 
 [dev-dependencies]
 cairo_test = "2.14.0"

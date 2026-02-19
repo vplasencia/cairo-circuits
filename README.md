@@ -1,6 +1,6 @@
 # Cairo Circuits
 
-This project contains some Cairo circuits, which can be found in the `src` and `packages` folders.
+This project contains some Cairo circuits, which can be found in the `src` folder.
 
 ## Currently Implemented Circuits
 

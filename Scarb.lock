@@ -2,12 +2,5 @@
 version = 1
 
 [[package]]
-name = "binary_merkle_root"
-version = "0.0.1"
-
-[[package]]
 name = "cairo_circuits"
 version = "0.1.0"
-dependencies = [
- "binary_merkle_root",
-]

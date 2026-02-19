@@ -1,4 +1,4 @@
-use binary_merkle_root::binary_merkle_root;
+mod binary_merkle_root;
 use core::integer::{u32, u8};
 use core::poseidon::poseidon_hash_span;
 
