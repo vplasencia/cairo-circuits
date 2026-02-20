@@ -24,6 +24,7 @@ fn main(
     merkle_proof_length: u32,
     merkle_proof_indices: [u8; MAX_DEPTH],
     merkle_proof_siblings: [felt252; MAX_DEPTH],
+    expected_merkle_root: felt252,
     x: felt252,
     scope: felt252,
 ) -> (felt252, felt252, felt252, felt252, felt252) {
@@ -32,7 +33,10 @@ fn main(
     let rate_commitment = poseidon2(identity_commitment, user_message_limit);
 
     // Calculate Merkle root.
-    let merkle_root = binary_merkle_root(rate_commitment, merkle_proof_length, merkle_proof_indices, merkle_proof_siblings);
+    let merkle_root = binary_merkle_root(
+        rate_commitment, merkle_proof_length, merkle_proof_indices, merkle_proof_siblings,
+    );
+    assert!(merkle_root == expected_merkle_root, "invalid merkle root");
 
     // message_id range check
     // Check 0 <= message_id < user_message_limit
@@ -75,6 +79,8 @@ mod tests {
         ];
         let x = 43;
         let scope = 32;
+        let expected_merkle_root =
+            1304906950737621371309303808943812194997635679334430880908474303267134943875;
 
         let (result_x, result_scope, result_y, result_merkle_root, result_nullifier) = main(
             secret,
@@ -83,6 +89,7 @@ mod tests {
             merkle_proof_length,
             merkle_proof_indices,
             merkle_proof_siblings,
+            expected_merkle_root,
             x,
             scope,
         );
@@ -100,5 +107,66 @@ mod tests {
         assert!(result_y == y);
         assert!(result_merkle_root == merkle_root);
         assert!(result_nullifier == nullifier);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_rejects_wrong_merkle_root() {
+        let secret = 1;
+        let user_message_limit = 3;
+        let message_id = 1;
+        let merkle_proof_length = 2;
+        let merkle_proof_indices = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        let merkle_proof_siblings = [
+            2, 984631471205578712614553929895140960202851439944671757216493909002271097326,
+            0, 0, 0, 0, 0,
+            0, 0, 0,
+        ];
+        let expected_merkle_root = 999;
+        let x = 43;
+        let scope = 32;
+
+        let _ = main(
+            secret,
+            user_message_limit,
+            message_id,
+            merkle_proof_length,
+            merkle_proof_indices,
+            merkle_proof_siblings,
+            expected_merkle_root,
+            x,
+            scope,
+        );
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_rejects_message_id_out_of_range() {
+        let secret = 1;
+        let user_message_limit = 3;
+        let message_id = 3;
+        let merkle_proof_length = 2;
+        let merkle_proof_indices = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        let merkle_proof_siblings = [
+            2, 984631471205578712614553929895140960202851439944671757216493909002271097326,
+            0, 0, 0, 0, 0,
+            0, 0, 0,
+        ];
+        let expected_merkle_root =
+            1304906950737621371309303808943812194997635679334430880908474303267134943875;
+        let x = 43;
+        let scope = 32;
+
+        let _ = main(
+            secret,
+            user_message_limit,
+            message_id,
+            merkle_proof_length,
+            merkle_proof_indices,
+            merkle_proof_siblings,
+            expected_merkle_root,
+            x,
+            scope,
+        );
     }
 }
