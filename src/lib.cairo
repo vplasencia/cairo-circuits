@@ -1,6 +1,6 @@
+use cairo_binary_merkle_root::binary_merkle_root::binary_merkle_root;
 use core::integer::{u32, u8};
 use core::poseidon::poseidon_hash_span;
-use cairo_binary_merkle_root::binary_merkle_root::binary_merkle_root;
 
 const MAX_DEPTH: u32 = 10;
 
@@ -61,11 +61,16 @@ mod tests {
 
     #[test]
     fn test_generate_y_root_and_nullifier() {
-        //               Root: 1304906950737621371309303808943812194997635679334430880908474303267134943875
-        //                      /                                                                     \
-        // -16486744807027352205489786600957196005677570325699694126518908851079093876   984631471205578712614553929895140960202851439944671757216493909002271097326
-        //          /                                                                   \                          /                                    \
-        // -1503490824099326712114934619828218718690284175124055840777542045490996146590    2                     3                                       4
+        //               Root:
+        //               1304906950737621371309303808943812194997635679334430880908474303267134943875
+        //                      /
+        //                      \
+        // -16486744807027352205489786600957196005677570325699694126518908851079093876
+        // 984631471205578712614553929895140960202851439944671757216493909002271097326
+        //          /                                                                   \
+        //          /                                    \
+        // -1503490824099326712114934619828218718690284175124055840777542045490996146590    2
+        // 3                                       4
 
         let secret = 1; // position of the leaf in the Merkle tree (0-based index)
         let user_message_limit = 3;
@@ -73,9 +78,8 @@ mod tests {
         let merkle_proof_length = 2;
         let merkle_proof_indices = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         let merkle_proof_siblings = [
-            2, 984631471205578712614553929895140960202851439944671757216493909002271097326,
+            2, 984631471205578712614553929895140960202851439944671757216493909002271097326, 0, 0, 0,
             0, 0, 0, 0, 0,
-            0, 0, 0,
         ];
         let x = 43;
         let scope = 32;
@@ -99,8 +103,7 @@ mod tests {
         let merkle_root =
             1304906950737621371309303808943812194997635679334430880908474303267134943875;
 
-        let nullifier =
-            147168360024309184885242077213476594539192210870918231348220650379991506298;
+        let nullifier = 147168360024309184885242077213476594539192210870918231348220650379991506298;
 
         assert!(result_x == x);
         assert!(result_scope == scope);
@@ -118,9 +121,8 @@ mod tests {
         let merkle_proof_length = 2;
         let merkle_proof_indices = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         let merkle_proof_siblings = [
-            2, 984631471205578712614553929895140960202851439944671757216493909002271097326,
+            2, 984631471205578712614553929895140960202851439944671757216493909002271097326, 0, 0, 0,
             0, 0, 0, 0, 0,
-            0, 0, 0,
         ];
         let expected_merkle_root = 999;
         let x = 43;
@@ -148,9 +150,8 @@ mod tests {
         let merkle_proof_length = 2;
         let merkle_proof_indices = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         let merkle_proof_siblings = [
-            2, 984631471205578712614553929895140960202851439944671757216493909002271097326,
+            2, 984631471205578712614553929895140960202851439944671757216493909002271097326, 0, 0, 0,
             0, 0, 0, 0, 0,
-            0, 0, 0,
         ];
         let expected_merkle_root =
             1304906950737621371309303808943812194997635679334430880908474303267134943875;
@@ -168,5 +169,38 @@ mod tests {
             x,
             scope,
         );
+    }
+
+    #[test]
+    fn test_accepts_message_id_last_valid_index() {
+        let secret = 1;
+        let user_message_limit = 3;
+        let message_id = 2;
+        let merkle_proof_length = 2;
+        let merkle_proof_indices = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        let merkle_proof_siblings = [
+            2, 984631471205578712614553929895140960202851439944671757216493909002271097326, 0, 0, 0,
+            0, 0, 0, 0, 0,
+        ];
+        let expected_merkle_root =
+            1304906950737621371309303808943812194997635679334430880908474303267134943875;
+        let x = 43;
+        let scope = 32;
+
+        let (result_x, result_scope, _, result_merkle_root, _) = main(
+            secret,
+            user_message_limit,
+            message_id,
+            merkle_proof_length,
+            merkle_proof_indices,
+            merkle_proof_siblings,
+            expected_merkle_root,
+            x,
+            scope,
+        );
+
+        assert!(result_x == x);
+        assert!(result_scope == scope);
+        assert!(result_merkle_root == expected_merkle_root);
     }
 }
