@@ -315,4 +315,21 @@ mod tests {
             DEFAULT_SCOPE,
         );
     }
+
+    #[test]
+    #[should_panic(expected: "message_id exceeds u32 range")]
+    fn test_rejects_message_id_negative_felt() {
+        // -1 in felt252 is P-1 (field element near PRIME); try_into must reject it
+        let _ = main(
+            DEFAULT_SECRET,
+            DEFAULT_USER_MESSAGE_LIMIT,
+            -1,
+            DEFAULT_MERKLE_PROOF_LENGTH,
+            default_indices(),
+            default_siblings(),
+            DEFAULT_MERKLE_ROOT,
+            DEFAULT_X,
+            DEFAULT_SCOPE,
+        );
+    }
 }
