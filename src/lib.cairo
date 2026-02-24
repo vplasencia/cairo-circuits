@@ -30,10 +30,6 @@ fn main(
 ) -> (felt252, felt252, felt252, felt252, felt252) {
     assert!(merkle_proof_length <= MAX_DEPTH, "merkle proof length exceeds MAX_DEPTH");
     assert!(merkle_proof_length > 0, "merkle proof length must be positive");
-    assert!(secret != 0, "secret must be non-zero");
-    assert!(x != 0, "x must be non-zero");
-    assert!(scope != 0, "scope must be non-zero");
-    assert!(user_message_limit != 0, "user_message_limit must be positive");
 
     let limit_result: Option<u32> = user_message_limit.try_into();
     assert!(limit_result.is_some(), "user_message_limit exceeds u32 range");
@@ -43,10 +39,14 @@ fn main(
     assert!(msg_id_result.is_some(), "message_id exceeds u32 range");
     let message_id_u32: u32 = msg_id_result.unwrap();
 
+    assert!(secret != 0, "secret must be non-zero");
+    assert!(x != 0, "x must be non-zero");
+    assert!(scope != 0, "scope must be non-zero");
+    assert!(user_message_limit != 0, "user_message_limit must be positive");
     assert!(message_id_u32 < limit_u32, "message_id out of range");
 
     let identity_commitment = poseidon1(secret);
-    let rate_commitment = poseidon2(identity_commitment, user_message_limit);
+    let rate_commitment = poseidon2(identity_commitment, limit_u32.into());
 
     // SAFETY: binary_merkle_root (cairo-binary-merkle-root) loops i from 0..MAX_DEPTH
     // and only reads indices[i]/siblings[i] when i < depth.  Both arrays are [_; MAX_DEPTH],
@@ -60,11 +60,9 @@ fn main(
     let a1 = poseidon3(secret, scope, message_id_u32.into());
     let y = a1 * x + secret;
 
-    // Nullifier generation.
     let nullifier = poseidon1(a1);
 
-    // Output x, the scope, the share, the root and nullifier.
-    (x, scope, y, expected_merkle_root, nullifier)
+    (x, scope, y, merkle_root, nullifier)
 }
 
 #[cfg(test)]
