@@ -35,13 +35,21 @@ fn main(
     assert!(scope != 0, "scope must be non-zero");
     assert!(user_message_limit != 0, "user_message_limit must be positive");
 
-    let limit_u32: u32 = user_message_limit.try_into().expect('limit conversion failed');
-    let message_id_u32: u32 = message_id.try_into().expect('message_id conversion failed');
+    let limit_result: Option<u32> = user_message_limit.try_into();
+    assert!(limit_result.is_some(), "user_message_limit exceeds u32 range");
+    let limit_u32: u32 = limit_result.unwrap();
+
+    let msg_id_result: Option<u32> = message_id.try_into();
+    assert!(msg_id_result.is_some(), "message_id exceeds u32 range");
+    let message_id_u32: u32 = msg_id_result.unwrap();
+
     assert!(message_id_u32 < limit_u32, "message_id out of range");
 
     let identity_commitment = poseidon1(secret);
     let rate_commitment = poseidon2(identity_commitment, user_message_limit);
 
+    // Arrays are [_; MAX_DEPTH] and merkle_proof_length <= MAX_DEPTH is already asserted,
+    // so binary_merkle_root cannot access out-of-bounds indices.
     let merkle_root = binary_merkle_root(
         rate_commitment, merkle_proof_length, merkle_proof_indices, merkle_proof_siblings,
     );
@@ -260,6 +268,38 @@ mod tests {
             0,
             DEFAULT_USER_MESSAGE_LIMIT,
             DEFAULT_MESSAGE_ID,
+            DEFAULT_MERKLE_PROOF_LENGTH,
+            default_indices(),
+            default_siblings(),
+            DEFAULT_MERKLE_ROOT,
+            DEFAULT_X,
+            DEFAULT_SCOPE,
+        );
+    }
+
+    #[test]
+    #[should_panic(expected: "user_message_limit exceeds u32 range")]
+    fn test_rejects_user_message_limit_exceeds_u32() {
+        let _ = main(
+            DEFAULT_SECRET,
+            0x100000000,
+            DEFAULT_MESSAGE_ID,
+            DEFAULT_MERKLE_PROOF_LENGTH,
+            default_indices(),
+            default_siblings(),
+            DEFAULT_MERKLE_ROOT,
+            DEFAULT_X,
+            DEFAULT_SCOPE,
+        );
+    }
+
+    #[test]
+    #[should_panic(expected: "message_id exceeds u32 range")]
+    fn test_rejects_message_id_exceeds_u32() {
+        let _ = main(
+            DEFAULT_SECRET,
+            DEFAULT_USER_MESSAGE_LIMIT,
+            0x100000000,
             DEFAULT_MERKLE_PROOF_LENGTH,
             default_indices(),
             default_siblings(),
