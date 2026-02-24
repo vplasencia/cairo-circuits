@@ -57,14 +57,14 @@ fn main(
     );
     assert!(merkle_root == expected_merkle_root, "invalid merkle root");
 
-    let a1 = poseidon3(secret, scope, message_id);
+    let a1 = poseidon3(secret, scope, message_id_u32.into());
     let y = a1 * x + secret;
 
     // Nullifier generation.
     let nullifier = poseidon1(a1);
 
     // Output x, the scope, the share, the root and nullifier.
-    (x, scope, y, merkle_root, nullifier)
+    (x, scope, y, expected_merkle_root, nullifier)
 }
 
 #[cfg(test)]
