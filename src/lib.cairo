@@ -28,6 +28,9 @@ fn main(
     x: felt252,
     scope: felt252,
 ) -> (felt252, felt252, felt252, felt252, felt252) {
+    assert!(merkle_proof_length <= MAX_DEPTH, "merkle proof length exceeds MAX_DEPTH");
+    assert!(merkle_proof_length > 0, "merkle proof length must be positive");
+
     let identity_commitment = poseidon1(secret);
 
     let rate_commitment = poseidon2(identity_commitment, user_message_limit);
@@ -42,9 +45,10 @@ fn main(
     // Check 0 <= message_id < user_message_limit
     let message_id_u32: u32 = message_id.try_into().expect('message_id conversion failed');
     let limit_u32: u32 = user_message_limit.try_into().expect('limit conversion failed');
+    assert!(limit_u32 > 0, "user_message_limit must be positive");
     assert!(message_id_u32 < limit_u32, "message_id out of range");
 
-    // SSS share calculations
+    assert!(x != 0, "x must be non-zero");
     let a1 = poseidon3(secret, scope, message_id);
     let y = a1 * x + secret;
 
@@ -113,7 +117,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected: "invalid merkle root")]
     fn test_rejects_wrong_merkle_root() {
         let secret = 1;
         let user_message_limit = 3;
@@ -124,7 +128,8 @@ mod tests {
             2, 984631471205578712614553929895140960202851439944671757216493909002271097326, 0, 0, 0,
             0, 0, 0, 0, 0,
         ];
-        let expected_merkle_root = 999;
+        let expected_merkle_root =
+            1304906950737621371309303808943812194997635679334430880908474303267134943876;
         let x = 43;
         let scope = 32;
 
@@ -142,7 +147,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected: "message_id out of range")]
     fn test_rejects_message_id_out_of_range() {
         let secret = 1;
         let user_message_limit = 3;
@@ -202,5 +207,95 @@ mod tests {
         assert!(result_x == x);
         assert!(result_scope == scope);
         assert!(result_merkle_root == expected_merkle_root);
+    }
+
+    #[test]
+    #[should_panic(expected: "merkle proof length exceeds MAX_DEPTH")]
+    fn test_rejects_merkle_proof_length_exceeds_max() {
+        let secret = 1;
+        let user_message_limit = 3;
+        let message_id = 1;
+        let merkle_proof_length = 11;
+        let merkle_proof_indices = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        let merkle_proof_siblings = [
+            2, 984631471205578712614553929895140960202851439944671757216493909002271097326, 0, 0, 0,
+            0, 0, 0, 0, 0,
+        ];
+        let expected_merkle_root =
+            1304906950737621371309303808943812194997635679334430880908474303267134943875;
+        let x = 43;
+        let scope = 32;
+
+        let _ = main(
+            secret,
+            user_message_limit,
+            message_id,
+            merkle_proof_length,
+            merkle_proof_indices,
+            merkle_proof_siblings,
+            expected_merkle_root,
+            x,
+            scope,
+        );
+    }
+
+    #[test]
+    #[should_panic(expected: "merkle proof length must be positive")]
+    fn test_rejects_zero_merkle_proof_length() {
+        let secret = 1;
+        let user_message_limit = 3;
+        let message_id = 1;
+        let merkle_proof_length = 0;
+        let merkle_proof_indices = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        let merkle_proof_siblings = [
+            2, 984631471205578712614553929895140960202851439944671757216493909002271097326, 0, 0, 0,
+            0, 0, 0, 0, 0,
+        ];
+        let expected_merkle_root =
+            1304906950737621371309303808943812194997635679334430880908474303267134943875;
+        let x = 43;
+        let scope = 32;
+
+        let _ = main(
+            secret,
+            user_message_limit,
+            message_id,
+            merkle_proof_length,
+            merkle_proof_indices,
+            merkle_proof_siblings,
+            expected_merkle_root,
+            x,
+            scope,
+        );
+    }
+
+    #[test]
+    #[should_panic(expected: "x must be non-zero")]
+    fn test_rejects_zero_x() {
+        let secret = 1;
+        let user_message_limit = 3;
+        let message_id = 1;
+        let merkle_proof_length = 2;
+        let merkle_proof_indices = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        let merkle_proof_siblings = [
+            2, 984631471205578712614553929895140960202851439944671757216493909002271097326, 0, 0, 0,
+            0, 0, 0, 0, 0,
+        ];
+        let expected_merkle_root =
+            1304906950737621371309303808943812194997635679334430880908474303267134943875;
+        let x = 0;
+        let scope = 32;
+
+        let _ = main(
+            secret,
+            user_message_limit,
+            message_id,
+            merkle_proof_length,
+            merkle_proof_indices,
+            merkle_proof_siblings,
+            expected_merkle_root,
+            x,
+            scope,
+        );
     }
 }
