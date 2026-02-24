@@ -28,8 +28,13 @@ fn main(
     x: felt252,
     scope: felt252,
 ) -> (felt252, felt252, felt252, felt252, felt252) {
+    // Cheapest checks first: felt252 comparisons and u32 bounds are O(1).
     assert!(merkle_proof_length <= MAX_DEPTH, "merkle proof length exceeds MAX_DEPTH");
     assert!(merkle_proof_length > 0, "merkle proof length must be positive");
+    assert!(secret != 0, "secret must be non-zero");
+    assert!(x != 0, "x must be non-zero");
+    assert!(scope != 0, "scope must be non-zero");
+    assert!(user_message_limit != 0, "user_message_limit must be positive");
 
     let limit_result: Option<u32> = user_message_limit.try_into();
     assert!(limit_result.is_some(), "user_message_limit exceeds u32 range");
@@ -39,10 +44,6 @@ fn main(
     assert!(msg_id_result.is_some(), "message_id exceeds u32 range");
     let message_id_u32: u32 = msg_id_result.unwrap();
 
-    assert!(secret != 0, "secret must be non-zero");
-    assert!(x != 0, "x must be non-zero");
-    assert!(scope != 0, "scope must be non-zero");
-    assert!(limit_u32 != 0, "user_message_limit must be positive");
     assert!(message_id_u32 < limit_u32, "message_id out of range");
 
     // Use validated u32 values converted back to felt252 in all crypto operations.
@@ -184,7 +185,8 @@ mod tests {
         assert!(result_scope == DEFAULT_SCOPE);
         assert!(result_merkle_root == DEFAULT_MERKLE_ROOT);
 
-        let a1 = super::poseidon3(DEFAULT_SECRET, DEFAULT_SCOPE, message_id);
+        let message_id_u32: u32 = message_id.try_into().unwrap();
+        let a1 = super::poseidon3(DEFAULT_SECRET, DEFAULT_SCOPE, message_id_u32.into());
         let expected_y = a1 * DEFAULT_X + DEFAULT_SECRET;
         let expected_nullifier = super::poseidon1(a1);
         assert!(result_y == expected_y, "Y_MISMATCH_AT_BOUNDARY");
