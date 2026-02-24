@@ -46,7 +46,7 @@ fn main(
     assert!(message_id_u32 < limit_u32, "message_id out of range");
 
     let identity_commitment = poseidon1(secret);
-    let rate_commitment = poseidon2(identity_commitment, limit_u32.into());
+    let rate_commitment = poseidon2(identity_commitment, user_message_limit);
 
     // SAFETY: binary_merkle_root (cairo-binary-merkle-root) loops i from 0..MAX_DEPTH
     // and only reads indices[i]/siblings[i] when i < depth.  Both arrays are [_; MAX_DEPTH],
@@ -57,7 +57,7 @@ fn main(
     );
     assert!(merkle_root == expected_merkle_root, "invalid merkle root");
 
-    let a1 = poseidon3(secret, scope, message_id_u32.into());
+    let a1 = poseidon3(secret, scope, message_id);
     let y = a1 * x + secret;
 
     let nullifier = poseidon1(a1);
