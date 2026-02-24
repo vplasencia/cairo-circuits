@@ -48,8 +48,10 @@ fn main(
     let identity_commitment = poseidon1(secret);
     let rate_commitment = poseidon2(identity_commitment, user_message_limit);
 
-    // Arrays are [_; MAX_DEPTH] and merkle_proof_length <= MAX_DEPTH is already asserted,
-    // so binary_merkle_root cannot access out-of-bounds indices.
+    // SAFETY: binary_merkle_root (cairo-binary-merkle-root) loops i from 0..MAX_DEPTH
+    // and only reads indices[i]/siblings[i] when i < depth.  Both arrays are [_; MAX_DEPTH],
+    // so every access is in-bounds.  Our merkle_proof_length <= MAX_DEPTH assert above is
+    // belt-and-suspenders; the library itself never indexes beyond the array size.
     let merkle_root = binary_merkle_root(
         rate_commitment, merkle_proof_length, merkle_proof_indices, merkle_proof_siblings,
     );
