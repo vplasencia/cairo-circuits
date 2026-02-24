@@ -54,10 +54,12 @@ fn main(
     let identity_commitment = poseidon1(secret);
     let rate_commitment = poseidon2(identity_commitment, limit_u32.into());
 
-    // SAFETY: binary_merkle_root (cairo-binary-merkle-root) loops i from 0..MAX_DEPTH
-    // and only reads indices[i]/siblings[i] when i < depth.  Both arrays are [_; MAX_DEPTH],
-    // so every access is in-bounds.  Our merkle_proof_length <= MAX_DEPTH assert above is
-    // belt-and-suspenders; the library itself never indexes beyond the array size.
+    // SAFETY: cairo_binary_merkle_root::binary_merkle_root loops i from 0..MAX_DEPTH
+    // and only reads indices[i]/siblings[i] when i < depth. Both arrays are [_; MAX_DEPTH],
+    // so every access is in-bounds. Our merkle_proof_length <= MAX_DEPTH assert above is
+    // belt-and-suspenders; the dependency implementation never indexes beyond array size.
+    // It also always iterates to MAX_DEPTH (no early return on root mismatch), so for a fixed
+    // MAX_DEPTH this path is constant-work up to the final equality assertion below.
     let merkle_root = binary_merkle_root(
         rate_commitment, merkle_proof_length, merkle_proof_indices, merkle_proof_siblings,
     );
@@ -85,6 +87,7 @@ mod tests {
 
     // Depth-2 Merkle tree derivation (all-left path, indices = [0,0]):
     //   leaf        = poseidon2(poseidon1(DEFAULT_SECRET), DEFAULT_USER_MESSAGE_LIMIT)
+    //               (runtime code uses limit_u32.into(), and for default values that equals 3)
     //   level-0 hash = poseidon2(leaf, sibling=2)
     //   level-1 hash = poseidon2(level-0 hash, LEVEL1_SIBLING)  =>  DEFAULT_MERKLE_ROOT
     const LEVEL1_SIBLING: felt252 =
