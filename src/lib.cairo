@@ -74,12 +74,17 @@ mod tests {
     const DEFAULT_USER_MESSAGE_LIMIT: felt252 = 3;
     const DEFAULT_MESSAGE_ID: felt252 = 1;
     const DEFAULT_MERKLE_PROOF_LENGTH: u32 = 2;
-    const DEFAULT_MERKLE_ROOT: felt252 =
-        1304906950737621371309303808943812194997635679334430880908474303267134943875;
     const DEFAULT_X: felt252 = 43;
     const DEFAULT_SCOPE: felt252 = 32;
+
+    // Depth-2 Merkle tree derivation (all-left path, indices = [0,0]):
+    //   leaf        = poseidon2(poseidon1(DEFAULT_SECRET), DEFAULT_USER_MESSAGE_LIMIT)
+    //   level-0 hash = poseidon2(leaf, sibling=2)
+    //   level-1 hash = poseidon2(level-0 hash, LEVEL1_SIBLING)  =>  DEFAULT_MERKLE_ROOT
     const LEVEL1_SIBLING: felt252 =
         984631471205578712614553929895140960202851439944671757216493909002271097326;
+    const DEFAULT_MERKLE_ROOT: felt252 =
+        1304906950737621371309303808943812194997635679334430880908474303267134943875;
 
     fn default_indices() -> [u8; 10] {
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -235,7 +240,7 @@ mod tests {
         let _ = main(
             DEFAULT_SECRET,
             0,
-            0,
+            DEFAULT_MESSAGE_ID,
             DEFAULT_MERKLE_PROOF_LENGTH,
             default_indices(),
             default_siblings(),
