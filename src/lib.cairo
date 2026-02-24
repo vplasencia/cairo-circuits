@@ -34,8 +34,8 @@ fn main(
     assert!(scope != 0, "scope must be non-zero");
     assert!(user_message_limit != 0, "user_message_limit must be positive");
 
-    let message_id_u32: u32 = message_id.try_into().expect('message_id conversion failed');
     let limit_u32: u32 = user_message_limit.try_into().expect('limit conversion failed');
+    let message_id_u32: u32 = message_id.try_into().expect('message_id conversion failed');
     assert!(message_id_u32 < limit_u32, "message_id out of range");
 
     let identity_commitment = poseidon1(secret);
@@ -121,8 +121,7 @@ mod tests {
             2, 984631471205578712614553929895140960202851439944671757216493909002271097326, 0, 0, 0,
             0, 0, 0, 0, 0,
         ];
-        let expected_merkle_root =
-            1304906950737621371309303808943812194997635679334430880908474303267134943876;
+        let expected_merkle_root = 42;
         let x = 43;
         let scope = 32;
 
